@@ -1,25 +1,44 @@
 const express = require('express');
 const router = express.Router();
-const todo = require('../model/todoSchema');
+const Todo = require('../model/todoSchema');
+const upload = require('../utils/upload');
 
 /* GET home page. */
 router.get('/', (req, res) => {
-  res.render('index', { title: 'Express' });
+  res.send({ title: 'Express' });
 });
 
-router.post('/create', async (req, res) => {
+router.post('/create', upload('file'), async (req, res) => {
   try {
-    const { title, desc, email, dueAt } = req.body;
-    // check if neccessary fields are filled
-    if (!title || !desc || !email || !dueAt) {
-      res
-        .status(400)
-        .send(`Please fill all the fields "{ title, desc, email, dueAt }"`);
-    }
+    const { title, desc, startAt, stopAt } = req.body;
     // create new todo object
-    const newTodo = await new todo({});
+    const newTodo = await Todo.create({
+      title,
+      desc,
+      'startAt.date': startAt,
+      'stopAt.date': stopAt,
+      file: req.body.file,
+    });
+    return res.status(200).send(newTodo);
   } catch (err) {
-    console.log(err);
+    res.status(400).send(err);
+  }
+});
+
+router.get('/todo', async (req, res) => {
+  try {
+    const { title, desc, startAt, stopAt } = req.body;
+    // create new todo object
+    const newTodo = await Todo.create({
+      title,
+      desc,
+      'startAt.date': startAt,
+      'stopAt.date': stopAt,
+      file: req.body.file,
+    });
+    return res.status(200).send(newTodo);
+  } catch (err) {
+    res.status(400).send(err);
   }
 });
 
